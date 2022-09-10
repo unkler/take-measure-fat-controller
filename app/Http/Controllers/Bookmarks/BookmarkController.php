@@ -98,10 +98,6 @@ class BookmarkController extends Controller
      */
     public function showCreateForm()
     {
-        if (Auth::id() === null) {
-            return redirect('/login');
-        }
-
         SEOTools::setTitle('ブックマーク作成');
 
         $master_categories = BookmarkCategory::query()->oldest('id')->get();
@@ -127,11 +123,6 @@ class BookmarkController extends Controller
      */
     public function create(CreateBookmarkRequest $request)
     {
-        if (Auth::guest()) {
-            // @note ここの処理はユーザープロフィールでも使われている
-            return redirect('/login');
-        }
-
         // 下記のサービスでも同様のことが実現できる
         // @see https://www.linkpreview.net/
         $previewClient = new Client($request->url);
@@ -170,11 +161,6 @@ class BookmarkController extends Controller
      */
     public function showEditForm(Request $request, int $id)
     {
-        if (Auth::guest()) {
-            // @note ここの処理はユーザープロフィールでも使われている
-            return redirect('/login');
-        }
-
         SEOTools::setTitle('ブックマーク編集');
 
         $bookmark = Bookmark::query()->findOrFail($id);
@@ -204,11 +190,6 @@ class BookmarkController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        if (Auth::guest()) {
-            // @note ここの処理はユーザープロフィールでも使われている
-            return redirect('/login');
-        }
-
         Validator::make($request->all(), [
             'comment' => 'required|string|min:10|max:1000',
             'category' => 'required|integer|exists:bookmark_categories,id',
@@ -245,11 +226,6 @@ class BookmarkController extends Controller
      */
     public function delete(int $id)
     {
-        if (Auth::guest()) {
-            // @note ここの処理はユーザープロフィールでも使われている
-            return redirect('/login');
-        }
-
         $model = Bookmark::query()->findOrFail($id);
 
         if ($model->can_not_delete_or_edit) {
