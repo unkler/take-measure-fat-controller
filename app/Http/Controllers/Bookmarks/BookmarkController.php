@@ -24,6 +24,7 @@ use Illuminate\View\View;
 use App\Bookmark\UseCase\ShowBookmarkListPageUseCase;
 use App\Bookmark\UseCase\CreateBookmarkUseCase;
 use App\Http\Requests\CreateBookmarkRequest;
+use App\Lib\LinkPreview\LinkPreview;
 
 class BookmarkController extends Controller
 {
@@ -125,7 +126,7 @@ class BookmarkController extends Controller
     public function create(CreateBookmarkRequest $request)
     {
 
-        $use_case = new CreateBookmarkUseCase();
+        $use_case = new CreateBookmarkUseCase(new LinkPreview());
         $use_case->handle($request->url, $request->category, $request->comment);
 
         // 暫定的に成功時は一覧ページへ
