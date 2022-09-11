@@ -9,8 +9,6 @@ use App\Models\Bookmark;
 use App\Models\BookmarkCategory;
 use App\Models\User;
 use Artesaos\SEOTools\Facades\SEOTools;
-use Dusterio\LinkPreview\Client;
-use Dusterio\LinkPreview\Exceptions\UnknownParserException;
 use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -24,7 +22,7 @@ use Illuminate\View\View;
 use App\Bookmark\UseCase\ShowBookmarkListPageUseCase;
 use App\Bookmark\UseCase\CreateBookmarkUseCase;
 use App\Http\Requests\CreateBookmarkRequest;
-use App\Lib\LinkPreview\LinkPreview;
+use App\Lib\LinkPreview\MockLinkPreview;
 
 class BookmarkController extends Controller
 {
@@ -121,13 +119,12 @@ class BookmarkController extends Controller
      * URLが存在しないなどの理由で失敗したらバリデーションエラー扱いにする
      *
      * @param CreateBookmarkRequest $request
+     * @param CreateBookmarkUseCase $useCase
      * @return Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function create(CreateBookmarkRequest $request)
+    public function create(CreateBookmarkRequest $request, CreateBookmarkUseCase $useCase)
     {
-
-        $use_case = new CreateBookmarkUseCase(new LinkPreview());
-        $use_case->handle($request->url, $request->category, $request->comment);
+        $useCase->handle($request->url, $request->category, $request->comment);
 
         // 暫定的に成功時は一覧ページへ
         return redirect('/bookmarks', 302);
