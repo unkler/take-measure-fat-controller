@@ -56,7 +56,6 @@ class ShowBookmarkListPageUseCaseTest extends TestCase
 
         // top_usersの中身を軽くチェック。IDが小さい順に格納されていればOK
         for ($i = 1; $i < 10; $i++) {
-            dump($response['top_users'][$i - 1]->name);
             self::assertSame($i, $response['top_users'][$i - 1]->id);
         }
     }
