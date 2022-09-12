@@ -9,20 +9,20 @@ use App\Models\Bookmark;
 use App\Models\BookmarkCategory;
 use App\Models\User;
 use Artesaos\SEOTools\Facades\SEOTools;
-use Exception;
+
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
+
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use App\Bookmark\UseCase\ShowBookmarkListPageUseCase;
 use App\Bookmark\UseCase\CreateBookmarkUseCase;
+use App\Bookmark\UseCase\UpdateBookmarkUseCase;
 use App\Http\Requests\CreateBookmarkRequest;
-use App\Lib\LinkPreview\MockLinkPreview;
+use App\Http\Requests\UpdateBookmarkRequest;
+
 
 class BookmarkController extends Controller
 {
@@ -164,33 +164,14 @@ class BookmarkController extends Controller
      * 本人以外は編集できない
      * ブックマーク後24時間経過したものは編集できない仕様
      *
-     * @param Request $request
+     * @param UpdateBookmarkRequest $request
      * @param int $id
+     * @param UpdateBookmarkUseCase $useCase
      * @return Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
-     * @throws ValidationException
      */
-    public function update(Request $request, int $id)
+    public function update(UpdateBookmarkRequest $request, int $id, UpdateBookmarkUseCase $useCase)
     {
-        Validator::make($request->all(), [
-            'comment' => 'required|string|min:10|max:1000',
-            'category' => 'required|integer|exists:bookmark_categories,id',
-        ])->validate();
-
-        $model = Bookmark::query()->findOrFail($id);
-
-        if ($model->can_not_delete_or_edit) {
-            throw ValidationException::withMessages([
-                'can_edit' => 'ブックマーク後24時間経過したものは編集できません'
-            ]);
-        }
-
-        if ($model->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $model->category_id = $request->category;
-        $model->comment = $request->comment;
-        $model->save();
+        $useCase->handle($id, $request->category, $request->comment);
 
         // 成功時は一覧ページへ
         return redirect('/bookmarks', 302);
